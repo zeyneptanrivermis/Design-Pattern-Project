@@ -1,0 +1,18 @@
+<main class="catalog">
+    <h2>5. Settings (Strategy and Singleton)</h2>
+    <p>Manage the behavioral patterns of the application here.</p>
+
+    <h3>📉 Low Stock Threshold (Singleton)</h3>
+    <p>Current Threshold: <strong id="current-threshold-settings">5</strong></p>
+    <label for="new-threshold">New Threshold Value:</label>
+    <input type="number" id="new-threshold" placeholder="E.g., 10">
+    <button onclick="simulateUpdateThreshold()" style="background-color: #6f42c1; color: white;">Update Threshold (Singleton)</button>
+
+    <h3 style="margin-top: 30px;">🌐 Pricing Strategy (Strategy)</h3>
+    <label for="strategy-path">Category Path:</label>
+    <input type="text" id="strategy-path" placeholder="E.g., 1 (Electronics)">
+    
+    <p style="margin-top: 15px;">Strategy to Apply:</p>
+    <button onclick="simulateStrategy('Normal')" style="background-color: #28a745; color: white;">Normal Pricing</button>
+    <button onclick="simulateStrategy('TaxIncluded')" style="background-color: #007bff; color: white;">Tax Included Pricing</button>
+</main>

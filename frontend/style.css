@@ -1,0 +1,226 @@
+/* style.css */
+
+/* === TEMEL SIFIRLAMA VE FONTLAR === */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #eef2f7; /* Daha açık, modern arka plan */
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    display: flex;
+    max-width: 1400px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+header {
+    background-color: #004b99; /* Koyu Mavi Başlık */
+    color: white;
+    padding: 25px 0;
+    text-align: center;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+header h1 {
+    margin: 0 0 5px;
+}
+
+/* === MENÜ (ASIDE) STİLLERİ === */
+.menu {
+    flex: 0 0 300px; /* Biraz daha geniş menü */
+    background-color: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Yumuşak gölge */
+    margin-right: 30px;
+    height: fit-content;
+}
+
+.menu h2 {
+    color: #004b99;
+    border-bottom: 3px solid #007bff;
+    padding-bottom: 12px;
+    margin-top: 0;
+    font-size: 1.5em;
+}
+
+.explanation {
+    font-size: 0.9em;
+    color: #777;
+    margin-bottom: 25px;
+}
+
+.menu button {
+    display: block;
+    width: 100%;
+    padding: 14px 15px;
+    margin-bottom: 12px;
+    background-color: #f1f7ff; /* Açık mavi buton arka planı */
+    color: #0056b3;
+    border: none;
+    border-left: 5px solid #007bff; /* Vurgu çizgisi */
+    border-radius: 6px;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+    font-weight: 600;
+    font-size: 1em;
+}
+
+.menu button:hover {
+    background-color: #d0e3ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* === BACKEND KONSOL SİMÜLASYONU (LOG ÇIKTISI) === */
+#backend-output {
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: #333; /* Konsol görünümü için koyu arka plan */
+    border-radius: 6px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.85em;
+    color: #fff;
+}
+#backend-output p { margin: 2px 0; }
+.log-info { color: #87ceeb; } /* Açık mavi */
+.log-action { color: #f0f8ff; font-weight: bold; } /* Beyaz */
+.log-success { color: #62c37e; } /* Yeşil */
+.log-error { color: #ff6347; font-weight: bold; } /* Kırmızı */
+.log-exit { color: #aaa; } 
+
+/* === KATALOG (MAIN) STİLLERİ === */
+.catalog {
+    flex-grow: 1;
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.catalog h2 {
+    color: #444;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 15px;
+    margin-top: 0;
+}
+
+.last-update {
+    font-size: 0.85em;
+    color: #999;
+    margin-bottom: 25px;
+}
+
+/* Kategori ve Ürün Listesi Stilleri (Composite Görünümü) */
+.category {
+    margin-bottom: 40px;
+    border-left: 5px solid #007bff;
+    padding-left: 20px;
+}
+
+.category h3 {
+    color: #007bff;
+    margin-top: 0;
+    font-size: 1.6em;
+}
+
+.subcategory {
+    border-left: 3px solid #5aa5ff; 
+    margin-top: 20px;
+    padding-left: 15px;
+}
+
+.subcategory h4 {
+    color: #5aa5ff;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+
+.product-list {
+    list-style: none;
+    padding: 0;
+}
+
+.product {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 10px;
+    border-bottom: 1px dashed #eee;
+    font-size: 1em;
+    transition: background-color 0.2s;
+}
+
+.product:hover {
+    background-color: #fafafa;
+}
+
+.product strong {
+    flex: 3;
+    color: #333;
+}
+
+.tag {
+    font-size: 0.75em;
+    padding: 4px 10px;
+    border-radius: 15px; /* Yuvarlak etiketler */
+    margin-right: 15px;
+    font-weight: 700;
+    color: white;
+    white-space: nowrap;
+}
+
+.decorated {
+    background-color: #ff9800; /* Decorator turuncu */
+}
+
+.strategy {
+    background-color: #4caf50; /* Strategy yeşil */
+}
+
+.price {
+    flex: 1;
+    text-align: right;
+    font-weight: bold;
+    color: #e91e63;
+    min-width: 80px;
+}
+
+.stock {
+    flex: 1;
+    text-align: right;
+    color: #666;
+    min-width: 60px;
+}
+
+.stock.low {
+    font-weight: bold;
+    color: #f44336; 
+    /* Gözlemci Uyarısı için Hafif Animasyon */
+    animation: pulse-red 1.5s infinite;
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7); }
+    70% { box-shadow: 0 0 0 8px rgba(244, 67, 54, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
+}
+
+/* === FOOTER === */
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 30px;
+    font-size: 0.9em;
+    color: #777;
+    border-top: 1px solid #eee;
+    background-color: white;
+}
