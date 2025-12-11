@@ -7,20 +7,20 @@ import java.util.Scanner;
 // ProductDecorator, PricingStrategy, vb.) aynı pakette veya uygun şekilde import edilmiş olması gerekir.
 
 public class Main {
-    // SINGLETON: ConfigurationManager nesnesini başlat
+    // SINGLETON: Start ConfigurationManager Object
     private static final ConfigurationManager CONFIG = ConfigurationManager.getInstance();
 
     private static List<CategoryComposite> categories = new ArrayList<>();
     
-    // OBSERVER: Eşikleri Singleton'dan al
+    // OBSERVER: Get thresholds from Singleton
     private static StockObserver lowStockObserver = new LowStockObserver(CONFIG.getLowStockThreshold());
     private static StockObserver StockChangeObserver = new StockChangeObserver();
 
-    // STRATEGY: Fiyatlandırma stratejisi nesneleri
+    // STRATEGY: Pricing strategy objects
     private static final PricingStrategy normalPricing = new NormalPricing();
     private static final PricingStrategy taxIncludedPricing = new TaxIncludedPricing();
     
-    // BUILDER/FACTORY: Builder ve Director nesneleri
+    // BUILDER/FACTORY: Builder and Director objects
     private static final ProductBuilder productBuilder = new ConcreteProductBuilder();
     private static final ProductBuildDirector director = new ProductBuildDirector(productBuilder);
 

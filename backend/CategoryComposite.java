@@ -119,7 +119,7 @@ class CategoryComposite implements Component {
 
     @Override
     public void setPricingStrategy(PricingStrategy strategy) {
-        // Strategy'yi alttaki tüm bileşenlere (ürünler ve alt kategoriler) yay
+        // Extend the Strategy to all the components below (products and subcategories).
         for (Component component : components) {
             component.setPricingStrategy(strategy);
         }
