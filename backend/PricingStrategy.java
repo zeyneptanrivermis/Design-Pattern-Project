@@ -1,3 +1,3 @@
 interface PricingStrategy {
-    double calculatePrice(double basePrice);
+  double calculatePrice(double basePrice);
 }

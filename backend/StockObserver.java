@@ -1,4 +1,3 @@
 interface StockObserver {
-
-    void update(String productName, int newStock, int oldStock);
+  void update(String productName, int newStock, int oldStock);
 }

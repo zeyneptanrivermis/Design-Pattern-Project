@@ -1,22 +1,19 @@
-// Bütün desenleri destekleyen ana arayüz
 interface Component {
-    String getName();
+  String getName();
 
-    void display(String indent);
+  void display(String indent);
 
-    void displayForSelection(String indent);
+  void displayForSelection(String indent);
 
-    // Nihai fiyatı Strategy ve Decorator uygulandıktan sonra döndürür.
-    double getPrice();
+  double getPrice();
 
-    int getStock();
+  int getStock();
 
-    // Observer pattern methods
-    void addObserver(StockObserver observer);
+  void addObserver(StockObserver observer);
 
-    void removeObserver(StockObserver observer);
+  void removeObserver(StockObserver observer);
 
-    void notifyObservers(int oldStock);
+  void notifyObservers(int oldStock);
 
-    // STRATEGY: Fiyatlandırma stratejisini ayarlama
-void setPricingStrategy(PricingStrategy strategy);}
+  void setPricingStrategy(PricingStrategy strategy);
+}

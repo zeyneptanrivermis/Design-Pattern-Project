@@ -1,13 +1,9 @@
 interface ProductBuilder {
-    // Ürünün adını ayarlar
-    ProductBuilder setName(String name);
-    
-    // Ürünün temel fiyatını ayarlar
-    ProductBuilder setBasePrice(double basePrice);
-    
-    // Ürünün başlangıç stoğunu ayarlar
-    ProductBuilder setStock(int stock);
+  ProductBuilder setName(String name);
 
-    // Yapılandırılan ürünü döndürür
-    Product build();
+  ProductBuilder setBasePrice(double basePrice);
+
+  ProductBuilder setStock(int stock);
+
+  Product build();
 }

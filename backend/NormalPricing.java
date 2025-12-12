@@ -1,6 +1,7 @@
 class NormalPricing implements PricingStrategy {
-    @Override
-    public double calculatePrice(double basePrice) {
-        return basePrice;
-    }
+
+  @Override
+  public double calculatePrice(double basePrice) {
+    return basePrice;
+  }
 }
