@@ -26,8 +26,22 @@
 
   <input type="hidden" id="product-id-hidden" value="" />
 
-  <h4 style="margin-top: 20px">1. Decorator Pattern (Price Modification)</h4>
-  <p>Apply a special discount (20% off) to the target product's base price.</p>
+  <h4 style="margin-top: 20px">1. Price Modification (Custom/Decorator)</h4>
+  <p>
+    <strong>A) Update Base Price Directly:</strong> Set a new base price. Final price might change based on Strategy (Tax) or existing Decorator.
+  </p>
+  <label for="new-base-price">New Base Price ($):</label>
+  <input type="number" id="new-base-price" placeholder="E.g., 999.99" step="0.01" />
+  <button
+    class="menu-button"
+    style="background-color: #28a745; color: white"
+    onclick="simulateUpdateProduct(document.getElementById('product-id-hidden').value, 'PriceUpdate')"
+  >
+    Update Base Price
+  </button>
+  <p style="margin-top: 15px;">
+    <strong>B) Apply Decorator:</strong> Apply a special discount (20% off) to the target product's base price.
+  </p>
   <button
     class="menu-button"
     style="background-color: #007bff; color: white"

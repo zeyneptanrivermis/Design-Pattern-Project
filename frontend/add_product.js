@@ -1,22 +1,21 @@
-// 🆕 GÜNCELLENMIŞ: Sınırsız derinlik destekli
+// frontend/add_product.js
 
-window.initializeSampleData = function() {
-  // 🔧 DÜZELTME: Eğer zaten veri varsa, üzerine yazma!
-  const existingState = JSON.parse(localStorage.getItem('inventoryState'));
-  
+window.initializeSampleData = function () {
+  const existingState = JSON.parse(localStorage.getItem("inventoryState"));
+
   if (existingState && Object.keys(existingState).length > 0) {
-    const confirm = window.confirm('⚠️ Data already exists!\n\nDo you want to RESET and lose all added products?\n\n✅ YES = Reset to sample data\n❌ NO = Keep current data');
-    
+    const confirm = window.confirm(
+      "⚠️ Data already exists!\n\nDo you want to RESET and lose all added products?\n\n✅ YES = Reset to sample data\n❌ NO = Keep current data"
+    );
+
     if (!confirm) {
-      console.log('ℹ️ User cancelled reset');
-      alert('✅ Your existing data is safe!');
+      console.log("ℹ️ User cancelled reset");
+      alert("✅ Your existing data is safe!");
       window.inventoryState = existingState;
-      window.loadParentCategories();
       return;
     }
   }
-  
-  // index.html'deki DEFAULT_STATE ile aynı yapıyı kullan
+
   window.inventoryState = {
     ELECTRONICS: {
       COMPUTERS: {
@@ -67,171 +66,201 @@ window.initializeSampleData = function() {
     ],
   };
 
-  localStorage.setItem('inventoryState', JSON.stringify(window.inventoryState));
-  console.log('✅ Sample data initialized!');
-  alert('✅ Sample data loaded! (Previous data was reset)');
+  localStorage.setItem("inventoryState", JSON.stringify(window.inventoryState));
+  console.log("✅ Sample data initialized!");
+  alert("✅ Sample data loaded! (Previous data was reset)");
   window.loadParentCategories();
 };
 
-// 🆕 Global değişken: Seçilen kategori yolu
 window.selectedCategoryPath = [];
 
-window.loadParentCategories = function() {
-  const state = window.inventoryState || JSON.parse(localStorage.getItem('inventoryState')) || {};
-  const parentSelect = document.getElementById('parent-category');
-  
+window.loadParentCategories = function () {
+  const state = JSON.parse(localStorage.getItem("inventoryState")) || {};
+  const parentSelect = document.getElementById("parent-category");
+
   if (!parentSelect) return;
 
-  console.log('📦 inventoryState:', state);
+  console.log("📦 inventoryState:", state);
 
-  // Reset
   window.selectedCategoryPath = [];
-  
-  // 🔧 DÜZELTME: Önce dynamic dropdown'ları temizle
   removeDynamicDropdowns();
-  
-  while (parentSelect.options.length > 1) {
-    parentSelect.remove(1);
+
+  while (parentSelect.options.length > 0) {
+    parentSelect.remove(0);
   }
 
-  // Ana kategorileri ekle
+  const defaultOption = document.createElement("option");
+  defaultOption.value = "";
+  defaultOption.textContent = "-- Select a Category --";
+  parentSelect.appendChild(defaultOption);
+
   for (const categoryName in state) {
-    const option = document.createElement('option');
+    const option = document.createElement("option");
     option.value = categoryName;
-    option.textContent = `📦 ${categoryName}`;
+
+    const categoryContent = state[categoryName];
+    const isProductList = Array.isArray(categoryContent);
+    const prefix = isProductList ? "📄 " : "📦 "; // Leaf vs. Composite
+
+    option.textContent = `${prefix}${categoryName}`;
     parentSelect.appendChild(option);
-    console.log('✅ Added top-level category:', categoryName);
+    console.log("✅ Added top-level category:", categoryName);
   }
-  
-  // 🔧 DÜZELTME: Path'i güncelle
+
   window.updateSelectedPath();
 };
 
-window.loadSubcategories = function() {
-  const parentName = document.getElementById('parent-category').value;
-  
+window.loadSubcategories = function () {
+  const parentName = document.getElementById("parent-category").value;
+
   if (!parentName) {
-    // Tüm dynamic dropdown'ları temizle
     removeDynamicDropdowns();
     window.selectedCategoryPath = [];
     window.updateSelectedPath();
     return;
   }
 
-  // Yolu güncelle
   window.selectedCategoryPath = [parentName];
-  
-  // Dynamic dropdown'ları temizle ve yeniden oluştur
+
   removeDynamicDropdowns();
-  
-  const state = window.inventoryState || JSON.parse(localStorage.getItem('inventoryState')) || {};
+
+  const state =
+    window.inventoryState ||
+    JSON.parse(localStorage.getItem("inventoryState")) ||
+    {};
   const currentCategory = state[parentName];
 
-  console.log('🔍 Selected:', parentName, 'Type:', typeof currentCategory, 'isArray:', Array.isArray(currentCategory));
+  console.log(
+    "🔍 Selected:",
+    parentName,
+    "Type:",
+    typeof currentCategory,
+    "isArray:",
+    Array.isArray(currentCategory)
+  );
 
-  // 🔧 DÜZELTME: Sadece obje ise (array değilse) dropdown ekle
-  if (currentCategory && typeof currentCategory === 'object' && !Array.isArray(currentCategory)) {
+  if (
+    currentCategory &&
+    typeof currentCategory === "object" &&
+    !Array.isArray(currentCategory)
+  ) {
     createNextLevelDropdown(currentCategory, 1);
   } else if (Array.isArray(currentCategory)) {
-    console.log('✅ This is a product list (array), no more dropdowns needed');
+    console.log("✅ This is a product list (array), no more dropdowns needed");
   }
 
   window.updateSelectedPath();
 };
 
-// 🆕 YENİ: Dynamic dropdown oluştur
 function createNextLevelDropdown(categoryObj, level) {
-  const container = document.querySelector('.catalog');
-  const categorySelectionDiv = container.querySelector('div[style*="background-color: #f8f9fa"]');
-  
+  const container = document.querySelector(".catalog");
+  const categorySelectionDiv = container.querySelector(
+    'div[style*="background-color: #f8f9fa"]'
+  );
+
   if (!categorySelectionDiv) {
-    console.error('❌ Category selection div not found');
+    console.error("❌ Category selection div not found");
     return;
   }
-  
-  // Yeni select oluştur
+
   const newSelectId = `category-level-${level}`;
-  const newLabel = document.createElement('label');
-  newLabel.setAttribute('for', newSelectId);
+  const newLabel = document.createElement("label");
+  newLabel.setAttribute("for", newSelectId);
   newLabel.innerHTML = `<strong>Level ${level + 1}:</strong>`;
-  
-  const newSelect = document.createElement('select');
+
+  const newSelect = document.createElement("select");
   newSelect.id = newSelectId;
-  newSelect.className = 'dynamic-category-select';
-  newSelect.setAttribute('data-level', level); // 🔧 DÜZELTME: Level bilgisi ekle
-  newSelect.style.cssText = 'width: 100%; padding: 8px; margin-bottom: 10px; font-size: 14px;';
+  newSelect.className = "dynamic-category-select";
+  newSelect.setAttribute("data-level", level);
+  newSelect.style.cssText =
+    "width: 100%; padding: 8px; margin-bottom: 10px; font-size: 14px;";
   newSelect.innerHTML = '<option value="">-- Select Subcategory --</option>';
-  
-  // Alt kategorileri ekle
+
   for (const subCatName in categoryObj) {
-    const option = document.createElement('option');
-    option.value = subCatName;
-    option.textContent = `${'└─'.repeat(level)} ${subCatName}`;
-    newSelect.appendChild(option);
+    const categoryContent = categoryObj[subCatName];
+    if (typeof categoryContent === "object" && categoryContent !== null) {
+      const isProductList = Array.isArray(categoryContent);
+      const prefix = isProductList ? "📄 " : "📦 ";
+
+      const option = document.createElement("option");
+      option.value = subCatName;
+      option.textContent = `${"└─".repeat(level)} ${prefix}${subCatName}`;
+      newSelect.appendChild(option);
+    }
   }
-  
-  // Event listener
-  newSelect.addEventListener('change', function() {
+
+  newSelect.addEventListener("change", function () {
     handleDynamicDropdownChange(this, level, categoryObj);
   });
-  
-  // Seçilen yol gösteriminden ÖNCE ekle
-  const pathDisplay = document.getElementById('selected-path')?.parentElement;
+
+  const pathDisplay = document.getElementById("selected-path")?.parentElement;
   if (pathDisplay) {
-    categorySelectionDiv.insertBefore(newSelect, pathDisplay);
-    categorySelectionDiv.insertBefore(newLabel, newSelect);
+    categorySelectionDiv.insertBefore(newLabel, pathDisplay); // Önce label'ı ekle
+    categorySelectionDiv.insertBefore(newSelect, pathDisplay); // Sonra select'i ekle
+  } else {
+    categorySelectionDiv.appendChild(newLabel);
+    categorySelectionDiv.appendChild(newSelect);
   }
-  
+
   console.log(`✅ Created dropdown for level ${level}`);
 }
 
-// 🆕 YENİ: Dynamic dropdown değişikliği handle et
 function handleDynamicDropdownChange(selectElement, level, parentCategoryObj) {
   const selectedValue = selectElement.value;
-  
+
   console.log(`🔍 Dropdown changed at level ${level}:`, selectedValue);
-  
+
   if (!selectedValue) {
-    // Seçim kaldırıldı, sonraki seviyeyi temizle
     window.selectedCategoryPath = window.selectedCategoryPath.slice(0, level);
     removeDropdownsAfterLevel(level);
     window.updateSelectedPath();
     return;
   }
-  
-  // Yolu güncelle
+
   window.selectedCategoryPath[level] = selectedValue;
   window.selectedCategoryPath = window.selectedCategoryPath.slice(0, level + 1);
-  
-  // Sonraki seviyeleri temizle
+
   removeDropdownsAfterLevel(level);
-  
+
   const nextCategory = parentCategoryObj[selectedValue];
-  
-  console.log(`🔍 Level ${level} selected:`, selectedValue, 'Type:', typeof nextCategory, 'isArray:', Array.isArray(nextCategory));
-  
-  // 🔧 DÜZELTME: Sadece obje ise (array değilse) yeni dropdown ekle
-  if (nextCategory && typeof nextCategory === 'object' && !Array.isArray(nextCategory)) {
+
+  console.log(
+    `🔍 Level ${level} selected:`,
+    selectedValue,
+    "Type:",
+    typeof nextCategory,
+    "isArray:",
+    Array.isArray(nextCategory)
+  );
+
+  if (
+    nextCategory &&
+    typeof nextCategory === "object" &&
+    !Array.isArray(nextCategory)
+  ) {
     createNextLevelDropdown(nextCategory, level + 1);
   } else if (Array.isArray(nextCategory)) {
-    console.log('✅ Reached product list (array), no more dropdowns');
+    console.log("✅ Reached product list (array), no more dropdowns");
   }
-  
+
   window.updateSelectedPath();
 }
 
-// 🆕 YENİ: Belirli seviyeden sonraki dropdown'ları sil
 function removeDropdownsAfterLevel(level) {
-  const allDynamicSelects = document.querySelectorAll('.dynamic-category-select');
-  
-  console.log(`🗑️ Removing dropdowns after level ${level}, found ${allDynamicSelects.length} dropdowns`);
-  
+  const allDynamicSelects = document.querySelectorAll(
+    ".dynamic-category-select"
+  );
+
+  console.log(
+    `🗑️ Removing dropdowns after level ${level}, found ${allDynamicSelects.length} dropdowns`
+  );
+
   allDynamicSelects.forEach((select) => {
-    const selectLevel = parseInt(select.getAttribute('data-level'));
-    
+    const selectLevel = parseInt(select.getAttribute("data-level"));
+
     if (selectLevel > level) {
       const label = select.previousElementSibling;
-      if (label && label.tagName === 'LABEL') {
+      if (label && label.tagName === "LABEL") {
         label.remove();
       }
       select.remove();
@@ -240,129 +269,135 @@ function removeDropdownsAfterLevel(level) {
   });
 }
 
-// 🆕 YENİ: Tüm dynamic dropdown'ları temizle
 function removeDynamicDropdowns() {
-  const allDynamicSelects = document.querySelectorAll('.dynamic-category-select');
-  
+  const allDynamicSelects = document.querySelectorAll(
+    ".dynamic-category-select"
+  );
+
   console.log(`🗑️ Removing all ${allDynamicSelects.length} dynamic dropdowns`);
-  
-  allDynamicSelects.forEach(select => {
+
+  allDynamicSelects.forEach((select) => {
     const label = select.previousElementSibling;
-    if (label && label.tagName === 'LABEL') {
+    if (
+      label &&
+      label.tagName === "LABEL" &&
+      label.htmlFor.startsWith("category-level-")
+    ) {
       label.remove();
     }
     select.remove();
   });
 }
 
-window.updateSelectedPath = function() {
-  const pathDisplay = document.getElementById('selected-path');
+window.updateSelectedPath = function () {
+  const pathDisplay = document.getElementById("selected-path");
   if (!pathDisplay) return;
 
-  const path = window.selectedCategoryPath.join(' → ');
-  pathDisplay.textContent = path || 'Not selected yet';
-  pathDisplay.style.color = path ? '#28a745' : '#999';
-  
-  console.log('📍 Current path:', window.selectedCategoryPath);
+  const path = window.selectedCategoryPath.join(" → ");
+  pathDisplay.textContent = path || "Not selected yet";
+  pathDisplay.style.color = path ? "#28a745" : "#999";
+
+  console.log("📍 Current path:", window.selectedCategoryPath);
 };
 
-window.simulateAddProduct = function() {
-  const prodName = document.getElementById('prod-name').value;
-  const prodPrice = document.getElementById('prod-price').value;
-  const prodStock = document.getElementById('prod-stock').value;
-  const prodCpu = document.getElementById('prod-cpu').value;
-  const prodRam = document.getElementById('prod-ram').value;
+window.simulateAddProduct = function () {
+  const prodName = document.getElementById("prod-name").value;
+  const prodPrice = document.getElementById("prod-price").value;
+  const prodStock = document.getElementById("prod-stock").value;
+  const prodCpu = document.getElementById("prod-cpu").value;
+  const prodRam = document.getElementById("prod-ram").value;
 
-  if (window.selectedCategoryPath.length === 0 || !prodName || !prodPrice || !prodStock) {
-    alert('❌ Please select a category and fill in all required fields!');
+  if (window.selectedCategoryPath.length === 0) {
+    alert("❌ Please select a category path!");
     return;
   }
 
-  const state = window.inventoryState || JSON.parse(localStorage.getItem('inventoryState')) || {};
+  if (!prodName || !prodPrice || !prodStock) {
+    alert("❌ Please fill in all required product fields!");
+    return;
+  }
 
-  // Yolu takip ederek hedef array'i bul
+  const state = JSON.parse(localStorage.getItem("inventoryState")) || {};
+
   let current = state;
-  let categoryPath = '';
-  
+  let categoryPath = "";
+  let parentObj = state; // current'in tutulduğu bir üst objeyi tutmak için
+  let parentKey = null;
+
   for (let i = 0; i < window.selectedCategoryPath.length; i++) {
     const key = window.selectedCategoryPath[i];
-    categoryPath += (i > 0 ? '.' : '') + key;
+    categoryPath += (i > 0 ? "." : "") + key;
+
+    if (!current || !current[key]) {
+      alert(`❌ Invalid category path: ${categoryPath}. Path not found.`);
+      return;
+    }
+    
+    parentObj = current;
+    parentKey = key;
     current = current[key];
-    
-    if (!current) {
-      alert(`❌ Invalid category path: ${categoryPath}`);
-      return;
-    }
   }
-
-  // Eğer current hala obje ise, ilk array'i bul
+  
+  // 💥 KRİTİK DÜZELTME: Eğer seçilen kategori bir Composite Node (Obje) ise...
   if (typeof current === 'object' && !Array.isArray(current)) {
-    let foundArray = null;
-    for (const key in current) {
-      if (Array.isArray(current[key])) {
-        foundArray = current[key];
-        categoryPath += `.${key}`;
-        current = foundArray;
-        break;
+      // 1. İçinde 'PRODUCTS' adında bir Leaf Node (Array) var mı diye kontrol et.
+      if (!current['PRODUCTS'] || !Array.isArray(current['PRODUCTS'])) {
+          // 2. Yoksa, otomatik olarak Leaf Node'u oluştur.
+          current['PRODUCTS'] = [];
+          console.log(`ℹ️ Composite Node "${parentKey}" içinde otomatik olarak 'PRODUCTS' (Leaf Node) oluşturuldu.`);
       }
-    }
-    
-    if (!foundArray) {
-      alert(`❌ No product array found in "${categoryPath}". Please select a deeper category.`);
-      return;
-    }
+      // 3. Ürünün ekleneceği düğümü (current) 'PRODUCTS' dizisine yönlendir.
+      current = current['PRODUCTS'];
   }
-
+  
+  // Eğer bu noktada hala bir dizi değilse, kural ihlali veya yapısal bir hata var demektir.
   if (!Array.isArray(current)) {
-    alert(`❌ Selected category "${categoryPath}" is not a product list.`);
+    alert(
+      `❌ Cannot add product here! The selected path "${categoryPath}" is not a valid product list (Leaf Node). Check console for state structure.`
+    );
     return;
   }
 
-  // Yeni ürün oluştur
+  // Ürün oluşturma (Builder/Factory simülasyonu)
   const newProduct = {
     id: Date.now(),
-    name: prodName + (prodCpu ? ` (${prodCpu})` : ''),
+    name: prodName + (prodCpu ? ` (${prodCpu})` : ""),
     basePrice: parseFloat(prodPrice),
-    finalPrice: parseFloat(prodPrice) * (prodCpu ? 1.15 : 1),
+    // Builder Pattern: CPU varsa fiyatı %15 artırır.
+    finalPrice: parseFloat(prodPrice) * (prodCpu ? 1.15 : 1), 
     stock: parseInt(prodStock),
     isDecorated: !!prodCpu,
     categoryPath: categoryPath,
-    cpu: prodCpu,
-    ram: prodRam ? parseInt(prodRam) : 0
+    cpu: prodCpu || null,
+    ram: prodRam ? parseInt(prodRam) : null,
   };
 
   current.push(newProduct);
-  
-  // State'i kaydet
+
   window.inventoryState = state;
-  localStorage.setItem('inventoryState', JSON.stringify(state));
-  
-  console.log('✅ Product added:', newProduct);
-  
-  // 🆕 BAŞARI MESAJI + ANA SAYFAYA YÖNLENDİRME
-  alert(`✅ Product "${prodName}" added to "${categoryPath}"!\n\n💰 Price: $${newProduct.finalPrice.toFixed(2)}\n📦 Stock: ${prodStock}\n\nRedirecting to home page...`);
-  
-  // 🆕 YENİ: Ana sayfayı yeniden yükle
-  setTimeout(function() {
-    // SPA routing kullanıyorsanız
-    if (typeof loadPage === 'function') {
-      loadPage('home');
-    } 
-    // Veya hash routing
-    else if (window.location.hash) {
-      window.location.hash = '#/home';
-    }
-    // Veya tam sayfa yenileme
-    else {
-      window.location.href = '/index.html';
-      window.location.reload();
-    }
+  localStorage.setItem("inventoryState", JSON.stringify(state));
+
+  console.log("✅ Product added:", newProduct);
+
+  alert(
+    `✅ Product "${prodName}" added to "${categoryPath}"!\n\n💰 Price: $${newProduct.finalPrice.toFixed(
+      2
+    )}\n📦 Stock: ${prodStock}\n\nRedirecting to home page...`
+  );
+
+  setTimeout(function () {
+    window.location.reload();
   }, 500);
 };
 
-// Sayfa yüklendiğinde kategorileri yükle
-setTimeout(function() {
-  if (document.getElementById('parent-category')) {
+function attemptLoadParentCategories() {
+  const parentSelect = document.getElementById("parent-category");
+  if (parentSelect && typeof window.loadParentCategories === "function") {
     window.loadParentCategories();
+    console.log("✅ Automatic parent category loading success.");
+  } else {
+    setTimeout(attemptLoadParentCategories, 100);
   }
-}, 200);
+}
+
+attemptLoadParentCategories();

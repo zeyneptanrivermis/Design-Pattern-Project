@@ -6,7 +6,6 @@
     <title>Inventory Management System (SPA Simulation)</title>
     <link rel="stylesheet" href="style.css" />
     <style>
-      /* Style Block (Same as previous, for completeness) */
       .modal {
         display: none;
         position: fixed;
@@ -74,7 +73,6 @@
           opacity: 1;
         }
       }
-      /* Style for the product list on the delete page */
       .delete-list {
         list-style: none;
         padding: 0;
@@ -99,7 +97,6 @@
       .delete-list strong {
         flex-basis: 40%;
       }
-      /* Pattern Context Style */
       .pattern-context {
         border-left: 5px solid #28a745;
         padding: 10px;
@@ -156,10 +153,8 @@
     </footer>
 
     <script>
-      // --- CORE UTILITIES MUST BE DEFINED FIRST ---
       const output = document.getElementById("backend-output");
 
-      // LOG FUNCTION (Defined high up for early error logging)
       function log(message, type = "info") {
         const p = document.createElement("p");
         p.className = `log-${type}`;
@@ -167,7 +162,6 @@
         output.prepend(p);
       }
 
-      // --- GLOBAL STATE ---
       let stockThreshold = 5;
       let nextProductId = 6;
 
@@ -232,7 +226,6 @@
 
       let inventoryState = {};
 
-      // --- PERSISTENCE FUNCTIONS ---
       function saveState() {
         try {
           localStorage.setItem(
@@ -269,50 +262,38 @@
 
       loadPersistentState();
 
-      // --- CORE HELPER FUNCTIONS (NOW DEFINED HERE) ---
-
       function getAllProducts() {
         const products = [];
 
-        // Hiyerarşiyi gezen iç fonksiyon
         function traverse(obj) {
           if (Array.isArray(obj)) {
-            // Eğer bir ürün dizisi bulursak, elemanlarını ana diziye ekle
             products.push(...obj);
-          }
-          // Eğer bir obje bulursak (ve null değilse), içindeki anahtarları gez
-          else if (typeof obj === "object" && obj !== null) {
+          } else if (typeof obj === "object" && obj !== null) {
             for (const key in obj) {
               traverse(obj[key]);
             }
           }
         }
-        traverse(inventoryState); // Ana state objesinden başla
+        traverse(inventoryState);
         return products;
       }
 
       function findProductById(id) {
         const allProducts = getAllProducts();
-        // find() methodu, dizideki elemanları döner ve ilk eşleşeni döndürür.
-        // Ancak gelen ID, butondan string olarak gelebilir, bu yüzden karşılaştırma yapmadan önce onu da number'a çevirelim.
         const targetId = parseInt(id);
 
         return allProducts.find((p) => p.id === targetId);
       }
 
-      // --- SPA ROUTER ---
       function loadPage(pageName) {
         const container = document.getElementById("content-container");
         container.innerHTML = "<h2>Loading Page...</h2>";
 
-        // 1. Determine the actual file name to fetch (strip the ID if present)
         let fileName = pageName;
         if (pageName.startsWith("update_product_form")) {
-          // If the name is like 'update_product_form-7', fetch only 'update_product_form.html'
           fileName = "update_product_form";
         }
 
-        // 2. Fetch the base HTML file using the cleaned fileName
         fetch(`pages/${fileName}.html`)
           .then((response) => {
             if (!response.ok) {
@@ -324,7 +305,6 @@
             container.innerHTML = html;
             log(`🖼️ Page loaded: ${pageName}`, "info");
 
-            // 3. Process the page logic using the ORIGINAL pageName (which contains the ID)
             if (pageName === "home") {
               renderCatalog();
             }
@@ -373,8 +353,6 @@
           );
         }
       }
-
-      // --- RENDERING FUNCTIONS ---
 
       function renderProductList(products) {
         if (!Array.isArray(products) || products.length === 0) {
@@ -499,22 +477,49 @@
         const listContainer = document.getElementById("delete-category-list");
         if (!listContainer) return;
 
-        let listHTML = "";
-        for (const catName in inventoryState) {
-          const status =
-            typeof inventoryState[catName] === "object" &&
-            !Array.isArray(inventoryState[catName])
-              ? "Multi-Level Object"
-              : "Products Array";
-          listHTML += `
-                    <li>
-                        <strong>${catName}</strong> 
-                        <span>Status: ${status}</span>
-                        <button onclick="simulateDeleteCategory('${catName}')">DELETE</button>
-                    </li>
-                `;
+        let listHTML = '<ul>';
+
+        function traverseAndAddCategories(node, currentPath = "") {
+            for (const key in node) {
+                const categoryContent = node[key];
+                const newPath = currentPath ? `${currentPath}.${key}` : key;
+                
+                if (typeof categoryContent === "object" && categoryContent !== null && !Array.isArray(categoryContent)) {
+                    const level = currentPath.split('.').length;
+                    const indent = level > 1 ? "—".repeat(level - 1) + " " : "";
+
+                    listHTML += `
+                        <li class="delete-list-item">
+                            <strong>${indent}📦 ${key}</strong> 
+                            <span>Path: ${newPath} (Composite Node)</span>
+                            <button onclick="simulateDeleteCategory('${newPath}')">DELETE</button>
+                        </li>
+                    `;
+                    traverseAndAddCategories(categoryContent, newPath);
+
+                } else if (Array.isArray(categoryContent)) {
+                    const level = currentPath.split('.').length + 1;
+                    const indent = "—".repeat(level - 1) + " ";
+                    
+                    listHTML += `
+                        <li class="delete-list-item">
+                            <strong>${indent}📄 ${key}</strong> 
+                            <span>Path: ${newPath} (Leaf Node/Products)</span>
+                            <button onclick="simulateDeleteCategory('${newPath}')">DELETE</button>
+                        </li>
+                    `;
+                }
+            }
         }
-        listContainer.innerHTML = `<ul class="delete-list">${listHTML}</ul>`;
+
+        traverseAndAddCategories(inventoryState);
+        listHTML += '</ul>';
+        
+        if (listHTML === '<ul></ul>') {
+             listContainer.innerHTML = "<p>No categories available to delete in the inventory.</p>";
+        } else {
+            listContainer.innerHTML = `<ul class="delete-list">${listHTML}</ul>`;
+        }
       }
 
       function renderUpdateSelectList() {
@@ -541,8 +546,6 @@
         });
         listContainer.innerHTML = `<ul class="delete-list">${listHTML}</ul>`;
       }
-
-      // --- SIMULATION FUNCTIONS (STATE CHANGERS) ---
 
       function simulateDeleteProduct(id, name) {
         let found = false;
@@ -576,94 +579,38 @@
         loadPage("delete_product");
       }
 
-      function simulateDeleteCategory(name) {
+      function simulateDeleteCategory(path) {
         if (
           confirm(
-            `Are you sure you want to delete the category: ${name}? This will delete all contained products/subcategories in the simulation.`
+            `Are you sure you want to delete the category: ${path}? This will delete all contained products/subcategories in the simulation.`
           )
         ) {
-          delete inventoryState[name];
-          saveState();
-          log(`🗑️ Category "${name}" deleted from state.`, "success");
+          const pathSegments = path.split('.');
+          let current = inventoryState;
+          let parent = null;
+          let finalKey = null;
+
+          for (let i = 0; i < pathSegments.length; i++) {
+              const key = pathSegments[i];
+              if (!current[key]) {
+                  log(`❌ Error: Category path "${path}" not found.`, "error");
+                  return;
+              }
+              parent = current;
+              finalKey = key;
+              current = current[key];
+          }
+
+          if (parent && finalKey) {
+              delete parent[finalKey];
+              saveState();
+              log(`🗑️ Category "${path}" deleted from state.`, "success");
+          } else {
+              log(`❌ Error: Deletion failed for category "${path}".`, "error");
+          }
+
           loadPage("delete_category");
         }
-      }
-
-      function simulateAddCategory() {
-        const name = document
-          .getElementById("cat-name")
-          .value.toUpperCase()
-          .trim();
-        if (!name) {
-          log("❌ Error: Category name cannot be empty.", "error");
-          return;
-        }
-        if (inventoryState[name]) {
-          log("❌ Error: Category already exists in the state.", "error");
-          return;
-        }
-
-        inventoryState[name] = [];
-        saveState();
-        log(`✅ Category "${name}" successfully added to state.`, "success");
-        loadPage("home");
-      }
-
-      function simulateAddProduct() {
-        const name = document.getElementById("prod-name").value.trim();
-        const price = parseFloat(document.getElementById("prod-price").value);
-        const stock = parseInt(document.getElementById("prod-stock").value);
-        const targetCat = document
-          .getElementById("prod-path")
-          .value.trim()
-          .toUpperCase();
-        const cpu = document.getElementById("prod-cpu").value.trim();
-
-        if (!name || isNaN(price) || isNaN(stock) || !targetCat) {
-          log(
-            "❌ Error: Product information or category path is missing/invalid.",
-            "error"
-          );
-          return;
-        }
-
-        let finalPrice = price;
-        if (cpu) {
-          finalPrice = price * 1.15;
-          log(
-            `🔧 Builder is creating Complex Product (${cpu}). Price increased by 15%.`,
-            "success"
-          );
-        } else {
-          log(`🏭 Factory/Simple Product created.`, "info");
-        }
-
-        const newProduct = {
-          id: nextProductId++,
-          name: name + (cpu ? ` (${cpu})` : ""),
-          basePrice: price,
-          finalPrice: finalPrice,
-          stock: stock,
-          isDecorated: !!cpu,
-          categoryPath: targetCat,
-        };
-        let targetCategory = inventoryState[targetCat];
-
-        if (Array.isArray(targetCategory)) {
-          targetCategory.push(newProduct);
-          saveState();
-          log(
-            `✅ Product "${name}" successfully added to category: ${targetCat}.`,
-            "success"
-          );
-        } else {
-          log(
-            `❌ Error: Category "${targetCat}" not found or is multi-level. Please use a top-level array category (e.g., CLOTHING).`,
-            "error"
-          );
-          return;
-        }
-        loadPage("home");
       }
 
       function simulateUpdateProduct(id, pattern) {
@@ -739,14 +686,11 @@
         loadPage("home");
       }
 
-      // --- EXPORT TO WINDOW (GLOBAL ACCESS) ---
       window.log = log;
       window.loadPage = loadPage;
       window.stockThreshold = stockThreshold;
       window.inventoryState = inventoryState;
-      window.simulateAddCategory = simulateAddCategory;
-      window.simulateAddProduct = simulateAddProduct;
-      window.simulateUpdateThreshold = simulateUpdateThreshold; // THIS is the correct function
+      window.simulateUpdateThreshold = simulateUpdateThreshold;
       window.simulateStrategy = simulateStrategy;
       window.renderCatalog = renderCatalog;
       window.simulateDeleteProduct = simulateDeleteProduct;
@@ -764,6 +708,6 @@
       };
     </script>
     <script src="add_product.js"></script>
-    <script src="add_category.js"></script>  <!-- ✅ BU SATIRDAN EMİN OL -->
+    <script src="add_category.js"></script>
   </body>
 </html>
